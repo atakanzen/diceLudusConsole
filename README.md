@@ -1,6 +1,6 @@
 # diceLudusConsole
 
-A [rebreak](#rebreak) for the web based application that I developed a while
+A [rebreak](#rebreak) for the web based application [DiceLudus](https://github.com/atakanzen/DiceLudus) that I developed a while
 ago.
 
 ## Raison d'être
