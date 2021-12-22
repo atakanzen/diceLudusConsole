@@ -36,4 +36,3 @@
 *.app
 
 cmake-build-debug
-CMakeLists.txt

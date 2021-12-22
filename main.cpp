@@ -1,4 +1,5 @@
 //#include <ncurses.h>
+#include <windows.h>
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -105,22 +106,15 @@ void play() {
 }
 
 int main() {
-    char command;
-
     displayMenu();
-    cin >> command;
 
-    switch (command) {
-        case 's':
-            system("clear");
-            // start game
-            break;
-        case 'q':
-            // stop game
-            break;
-        default:
-            break;
+    if (GetKeyState('S')) {
+        cout << "BABA UYYUORUM";
+        Sleep(1000);
+        system("CLS");
+        play();
+    } else if (GetKeyState('Q')) {
+        return 0;
     }
-
     return 0;
 }

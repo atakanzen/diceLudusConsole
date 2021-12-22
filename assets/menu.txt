@@ -11,4 +11,4 @@
                   Press (s) to start playing.
                   Press (q) to quit the game.
 
-                    Made with ♥ by atakanzen.
+                   Made with  ♥  by atakanzen.
