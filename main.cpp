@@ -1,8 +1,10 @@
+//#include <ncurses.h>
 #include <iostream>
 #include <fstream>
 #include <string>
 #include <map>
 #include <random>
+
 
 using namespace std;
 
@@ -12,6 +14,7 @@ const map<int, int> diceLineMap = {{1, 0},
                                    {4, 288},
                                    {5, 384},
                                    {6, 480}};
+
 
 const map<int, int> byteCountMap = {{0, 0},
                                     {1, 30},
@@ -33,18 +36,23 @@ int rollDice() {
     return distribution(generator);
 }
 
+// Returns the line number of the specified dice by calculating the byte count of each line.
+int getLineNumber(int diceLineMapKey, int byteCountMapKey) {
+    return diceLineMap.at(diceLineMapKey) + byteCountMap.at(byteCountMapKey);
+}
+
 // Returns the ASCII art of the specified dice by using sprite technique.
 string getDiceAscii(ifstream &file, int firstDice, int secondDice) {
-    int diceOneNextPosition = 0, diceTwoNextPosition = 0;
+    int diceOneNextLine = 0, diceTwoNextLine = 0;
     string firstTempLine, secondTempLine, diceFaces;
 
     for (int i = 0; i < 6; ++i) {
-        diceOneNextPosition = diceLineMap.at(firstDice) + byteCountMap.at(i);
-        diceTwoNextPosition = diceLineMap.at(secondDice) + byteCountMap.at(i);
+        diceOneNextLine = getLineNumber(firstDice, i);
+        diceTwoNextLine = getLineNumber(secondDice, i);
 
-        file.seekg(diceOneNextPosition);
+        file.seekg(diceOneNextLine);
         getline(file, firstTempLine);
-        file.seekg(diceTwoNextPosition);
+        file.seekg(diceTwoNextLine);
         getline(file, secondTempLine);
 
         diceFaces.append(firstTempLine)
@@ -56,19 +64,63 @@ string getDiceAscii(ifstream &file, int firstDice, int secondDice) {
     return diceFaces;
 }
 
-int main() {
+ifstream openInputFile(string filePath) {
+    ifstream file(filePath, ios::in);
+    return file;
+};
+
+void displayMenu() {
+    ifstream menuFile = openInputFile("assets/menu.txt");
+    string tempLine, menu;
+    if (menuFile.good()) {
+        while (getline(menuFile, tempLine)) {
+            menu.append(string(15, ' '))
+                    .append(tempLine)
+                    .append(string(15, ' '))
+                    .append("\n");
+        }
+
+        cout << menu;
+    } else {
+        cout << "";
+    }
+}
+
+void play() {
     int firstDice, secondDice;
-    ifstream diceFile("assets/dices.txt", ios::in);
+    ifstream diceFile = openInputFile("assets/dices.txt");
 
     if (diceFile.good()) {
         firstDice = rollDice();
         secondDice = rollDice();
 
         string diceASCII = getDiceAscii(diceFile, firstDice, secondDice);
-        cout << diceASCII;
+
+    } else {
+        cout << "Could not open dice sprite map." << endl;
+        diceFile.close();
     }
 
     diceFile.close();
+}
+
+int main() {
+    char command;
+
+    displayMenu();
+    cin >> command;
+
+    switch (command) {
+        case 's':
+            system("clear");
+            // start game
+            break;
+        case 'q':
+            // stop game
+            break;
+        default:
+            break;
+    }
 
     return 0;
 }
