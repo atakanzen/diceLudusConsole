@@ -1,0 +1,12 @@
+                              How To Play:
+
+                      - Press (r) to roll the dice.
+                  - Press (h) to hold the current score.
+
+                                 Rules:
+
+      - If you roll double six twice in a row then your global score will be reset.
+              - If you roll one then your current score will be reset.
+      - If one of your score resets then the turn will pass on to the next player.
+
+                      Press any key to skip rules.

@@ -1,10 +1,10 @@
-//#include <ncurses.h>
 #include <windows.h>
 #include <iostream>
 #include <fstream>
 #include <string>
 #include <map>
 #include <random>
+#include <conio.h>
 
 
 using namespace std;
@@ -26,6 +26,15 @@ const map<int, int> byteCountMap = {{0, 0},
 
 const int diceRangeFrom = 1;
 const int diceRangeTo = 6;
+
+int scores[2] = {0, 0};
+int activePlayer = 0;
+int currentScore = 0;
+int lastDiceOne = 0;
+int lastDiceTwo = 0;
+
+HANDLE handleOut = GetStdHandle(STD_OUTPUT_HANDLE);
+string diceASCII;
 
 // Returns an int in range from 1 to 6. Using uniform_int_distribution since the
 // rand() does not generate numbers uniformly.
@@ -56,7 +65,8 @@ string getDiceAscii(ifstream &file, int firstDice, int secondDice) {
         file.seekg(diceTwoNextLine);
         getline(file, secondTempLine);
 
-        diceFaces.append(firstTempLine)
+        diceFaces.append(string(15, ' '))
+                .append(firstTempLine)
                 .append(string(5, ' '))
                 .append(secondTempLine)
                 .append("\n");
@@ -73,6 +83,7 @@ ifstream openInputFile(string filePath) {
 void displayMenu() {
     ifstream menuFile = openInputFile("assets/menu.txt");
     string tempLine, menu;
+
     if (menuFile.good()) {
         while (getline(menuFile, tempLine)) {
             menu.append(string(15, ' '))
@@ -83,38 +94,116 @@ void displayMenu() {
 
         cout << menu;
     } else {
-        cout << "";
+        cout << "Menu file could not be opened.";
     }
 }
 
-void play() {
-    int firstDice, secondDice;
-    ifstream diceFile = openInputFile("assets/dices.txt");
+void displayRules() {
+    ifstream ruleFile = openInputFile("assets/rules.txt");
+    string rules, tempLine;
 
-    if (diceFile.good()) {
-        firstDice = rollDice();
-        secondDice = rollDice();
-
-        string diceASCII = getDiceAscii(diceFile, firstDice, secondDice);
-
+    if (ruleFile.good()) {
+        while (getline(ruleFile, tempLine)) {
+            rules.append(string(15, ' '))
+                    .append(tempLine)
+                    .append(string(15, ' '))
+                    .append("\n");
+        }
     } else {
-        cout << "Could not open dice sprite map." << endl;
-        diceFile.close();
+        cout << "Rule file could not be opened.";
     }
 
-    diceFile.close();
+    cout << rules;
+}
+
+void displayUI(string diceASCII, HANDLE &handleOut) {
+    char buffOne[100];
+    char buffTwo[100];
+    sprintf(buffOne, "Global Score:  %d\n\n\t\t\t\t\tRound Score:  %d\n", scores[0], currentScore);
+    sprintf(buffTwo, "Global Score:  %d\n\n", scores[1]);
+
+    cout << diceASCII;
+
+    if (activePlayer == 0) {
+        SetConsoleTextAttribute(handleOut, FOREGROUND_RED);
+    }
+    cout << string(15, ' ') << "Player One\n\n";
+    SetConsoleTextAttribute(handleOut, FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
+    cout << string(15, ' ') << buffOne;
+    if (activePlayer == 1) {
+        SetConsoleTextAttribute(handleOut, FOREGROUND_RED);
+    }
+    cout << string(15, ' ') << "Player Two\n\n";
+    SetConsoleTextAttribute(handleOut, FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
+    cout << string(15, ' ') << buffTwo;
+}
+
+void nextPlayer() {
+    currentScore = 0;
+    if (activePlayer == 0) {
+        activePlayer = 1;
+    } else {
+        activePlayer = 0;
+    }
+}
+
+void holdScore() {
+    scores[activePlayer] += currentScore;
+    nextPlayer();
+    displayUI(diceASCII, handleOut);
+}
+
+
+void play(ifstream &diceFile, HANDLE &handleOut) {
+    int diceOne, diceTwo;
+
+    diceOne = rollDice();
+    diceTwo = rollDice();
+
+    if ((diceOne == 6 && lastDiceOne == 6) && (diceTwo == 6 && lastDiceTwo == 6)) {
+        scores[activePlayer] = 0;
+        nextPlayer();
+    } else if (diceOne == 1 || diceTwo == 1) {
+        currentScore = 0;
+        nextPlayer();
+    } else {
+        currentScore += diceOne + diceTwo;
+    }
+
+    diceASCII = getDiceAscii(diceFile, diceOne, diceTwo);
+
+    displayUI(diceASCII, handleOut);
+
+    lastDiceOne = diceOne;
+    lastDiceTwo = diceTwo;
+
 }
 
 int main() {
-    displayMenu();
+    bool run = true;
+    bool started = false;
+    ifstream diceFile = openInputFile("assets/dices.txt");
 
-    if (GetKeyState('S')) {
-        cout << "BABA UYYUORUM";
-        Sleep(1000);
-        system("CLS");
-        play();
-    } else if (GetKeyState('Q')) {
-        return 0;
+    displayMenu();
+    while (run) {
+        if (_kbhit()) {
+            system("CLS");
+            switch (_getch()) {
+                case 's':
+                    displayRules();
+                    break;
+                case 'r':
+                    play(diceFile, handleOut);
+                    break;
+                case 'h':
+                    holdScore();
+                    break;
+                case 'q':
+                    run = false;
+            }
+        }
+
     }
+
     return 0;
 }
