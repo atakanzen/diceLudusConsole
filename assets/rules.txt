@@ -9,4 +9,4 @@
               - If you roll one then your current score will be reset.
       - If one of your score resets then the turn will pass on to the next player.
 
-                      Press any key to skip rules.
+              Press (r) to roll the dice and start the game!

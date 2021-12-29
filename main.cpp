@@ -32,6 +32,8 @@ int activePlayer = 0;
 int currentScore = 0;
 int lastDiceOne = 0;
 int lastDiceTwo = 0;
+int targetScore = 0;
+bool run = true;
 
 HANDLE handleOut = GetStdHandle(STD_OUTPUT_HANDLE);
 string diceASCII;
@@ -93,6 +95,8 @@ void displayMenu() {
         }
 
         cout << menu;
+        cout << endl << string(33, ' ') << "Please set a target score: ";
+        cin >> targetScore;
     } else {
         cout << "Menu file could not be opened.";
     }
@@ -149,8 +153,15 @@ void nextPlayer() {
 
 void holdScore() {
     scores[activePlayer] += currentScore;
-    nextPlayer();
-    displayUI(diceASCII, handleOut);
+    if (scores[activePlayer] >= targetScore) {
+        string winMessage = activePlayer == 0 ? "Player One Win!" : "Player Two Win!";
+        cout << winMessage << endl;
+        Sleep(3000);
+        run = false;
+    } else {
+        nextPlayer();
+        displayUI(diceASCII, handleOut);
+    }
 }
 
 
@@ -180,25 +191,26 @@ void play(ifstream &diceFile, HANDLE &handleOut) {
 }
 
 int main() {
-    bool run = true;
-    bool started = false;
     ifstream diceFile = openInputFile("assets/dices.txt");
 
     displayMenu();
     while (run) {
         if (_kbhit()) {
-            system("CLS");
             switch (_getch()) {
                 case 's':
+                    system("CLS");
                     displayRules();
                     break;
                 case 'r':
+                    system("CLS");
                     play(diceFile, handleOut);
                     break;
                 case 'h':
+                    system("CLS");
                     holdScore();
                     break;
                 case 'q':
+                    system("CLS");
                     run = false;
             }
         }

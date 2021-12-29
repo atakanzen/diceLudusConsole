@@ -8,7 +8,7 @@
 
                             Welcome!
 
-                  Press (s) to start playing.
+         Press (s) after you set a target score to start playing.
                   Press (q) to quit the game.
 
                    Made with  ♥  by atakanzen.
